@@ -12,8 +12,15 @@
 #include <sys/stat.h>
 
 
+#define SDHC_MIN_SIZE      (2LL * 1024LL * 1024LL * 1024LL)
 #define SDMMC_BL1_OFFSET   (-(512*2 + 8*1024))
 #define SDHC_BL1_OFFSET    (-(1025*512 + 512 + 1024*8))
+
+enum sdtype {
+        SDTYPE_SDMMC,
+        SDTYPE_SDHC,
+        SDTYPE_ERR
+};
 
 
 /* 
@@ -29,6 +36,32 @@ void errmsg(const char *format, ...)
         fprintf(stderr, ": %s\n", msg);
         va_end(args);
 }
+
+
+/* 
+   Test if specified MMC device is SDHC or SDMMC
+ */
+enum sdtype test_sd_type(const char *mmcdev)
+{
+        int mmc_fd = open(mmcdev, O_RDONLY);
+        if (mmc_fd != -1) {
+                off64_t mmc_size = lseek64(mmc_fd, 0, SEEK_END);
+                if (mmc_size != -1) {
+                        return (mmc_size > SDHC_MIN_SIZE)?
+                                SDTYPE_SDHC: SDTYPE_SDMMC;
+                }
+                else {
+                        errmsg("Cannot seek this MMC device");
+                        close(mmc_fd);
+                        return SDTYPE_ERR;
+                }
+        }
+        else {
+                errmsg("Cannot open device file %s", mmcdev);
+                return SDTYPE_ERR;
+        }
+}
+
 
 /* 
    Copy loader to mmcdev, start from SEEK_END + bl_offset.
@@ -92,13 +125,32 @@ quit:
 }
 
 
+int dd_loader(const char *mmcdev, const char *loader)
+{
+        enum sdtype type = test_sd_type(mmcdev);
+        if (type == SDTYPE_ERR) {
+                fprintf(stderr, "Cannot recognize MMC type\n");
+                return -1;
+        }
+
+        if (type == SDTYPE_SDHC) {
+                printf("%s is an SDHC device\n", mmcdev);
+                return dd_loader_to_steppingstone(mmcdev, loader, SDHC_BL1_OFFSET);
+        }
+        else {
+                printf("%s is an SDMMC device\n", mmcdev);
+                return dd_loader_to_steppingstone(mmcdev, loader, SDMMC_BL1_OFFSET);
+        }
+}
+        
+
 int main(int argc, char *argv[])
 {
         const char *progname = argv[0];
         if (argc == 3) {
                 const char *mmcdev = argv[1];
                 const char *loader = argv[2];
-                if (dd_loader_to_steppingstone(mmcdev, loader, SDHC_BL1_OFFSET) != 0) {
+                if (dd_loader(mmcdev, loader) != 0) {
                         fprintf(stderr, "Writing loader image \"%s\" failed\n", loader);
                 }
         }
