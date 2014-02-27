@@ -106,7 +106,7 @@ int dd_loader_to_steppingstone(const char *mmcdev, const char *loader, int bl_of
 
         if (ret == 0) {
                 /* successfully copied loader image to the mmc */
-                printf("Loader sucessfully copied to the mmc, congratulations!\n");
+                printf("%s sucessfully copied to the mmc\n", loader);
                 close(mmc_fd);
                 close(bl_fd);
                 sync();
@@ -125,21 +125,34 @@ quit:
 }
 
 
-int dd_loader(const char *mmcdev, const char *loader)
+int dd_loader(const char *mmcdev, const char *bl1_loader, const char *bl2_loader)
 {
         enum sdtype type = test_sd_type(mmcdev);
+        off64_t bl1_offset;
+        
         if (type == SDTYPE_ERR) {
                 fprintf(stderr, "Cannot recognize MMC type\n");
                 return -1;
         }
-
-        if (type == SDTYPE_SDHC) {
-                printf("%s is an SDHC device\n", mmcdev);
-                return dd_loader_to_steppingstone(mmcdev, loader, SDHC_BL1_OFFSET);
-        }
         else {
-                printf("%s is an SDMMC device\n", mmcdev);
-                return dd_loader_to_steppingstone(mmcdev, loader, SDMMC_BL1_OFFSET);
+                if (type == SDTYPE_SDHC) {
+                        printf("%s is an SDHC device\n", mmcdev);
+                        bl1_offset = SDHC_BL1_OFFSET;                
+                }
+                else {
+                        printf("%s is an SDMMC device\n", mmcdev);
+                        bl1_offset = SDMMC_BL1_OFFSET;
+                }
+                
+                if (dd_loader_to_steppingstone(mmcdev, bl1_loader, bl1_offset) != 0) {
+                        return -1;
+                }
+                if (bl2_loader != NULL) {
+                        return dd_loader_to_steppingstone(mmcdev, bl2_loader, bl1_offset - 256 * 1024);
+                }
+                else {
+                        return 0;
+                }
         }
 }
         
@@ -147,17 +160,19 @@ int dd_loader(const char *mmcdev, const char *loader)
 int main(int argc, char *argv[])
 {
         const char *progname = argv[0];
-        if (argc == 3) {
+        if (argc >= 3) {
                 const char *mmcdev = argv[1];
                 const char *loader = argv[2];
-                if (dd_loader(mmcdev, loader) != 0) {
+                const char *loader2 = argc == 4? argv[3]: NULL;
+                if (dd_loader(mmcdev, loader, loader2) != 0) {
                         fprintf(stderr, "Writing loader image \"%s\" failed\n", loader);
                 }
         }
         else {
-                printf("usage: %s [mmcdev] [loaderimg]\n"
-                        "  example: %s /dev/sdb ./mmc/loader.bin\n", 
-                        progname, progname);
+                printf("usage: %s [mmcdev] [loader1img] <loader2img>\n"
+                        "  example: %s /dev/sdb ./mmc/loader.bin\n"
+                        "           %s /dev/sdb ./mmc/loader.bin ./mmc/loader2.bin\n", 
+                        progname, progname, progname);
         }
         return 0;
 }
