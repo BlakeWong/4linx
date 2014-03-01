@@ -98,16 +98,12 @@ lowlevel_init:
 	mov	r3, #0x0
 	str	r3, [r0, #oVECTADDR]
 	str	r3, [r1, #oVECTADDR]
-
+    
 	/* init system clock */
 	bl system_clock_init
 
 	/* for UART */
 	bl uart_asm_init
-
-	ldr	r0, =ELFIN_UART_BASE
-	ldr	r1, =0x4b4b4b4b
-	str	r1, [r0, #UTXH_OFFSET]
 
 #if defined(CONFIG_NAND)
 	/* simple init for NAND */
@@ -126,12 +122,9 @@ lowlevel_init:
 #endif
 
 1:
-	ldr	r0, =ELFIN_UART_BASE
-	ldr	r1, =0x4b4b4b4b
-	str	r1, [r0, #UTXH_OFFSET]
-
 	mov	lr, r12
 	mov	pc, lr
+    
 #if 1
 wakeup_reset:
 
@@ -320,9 +313,6 @@ uart_asm_init:
 	ldr	r1, =0x3
 #endif
 	str	r1, [r0, #UDIVSLOT_OFFSET]
-
-	ldr	r1, =0x4f4f4f4f
-	str	r1, [r0, #UTXH_OFFSET]		@'O'
 
 	mov	pc, lr
 
