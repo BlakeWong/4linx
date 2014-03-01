@@ -61,6 +61,16 @@ void ledsup(unsigned int pattern)
         GPMDAT_REG = pattern;
 }
 
+/* 
+   Waste some CPU cycles.
+*/
+void sleep(int msecs)
+{
+        volatile int i = 0, j = 0;
+        for ( ; i < msecs; i++) {
+                for (j = 0; j++ < 0x7fff; );
+        }
+}
 
 int main()
 {
@@ -102,8 +112,25 @@ int main()
     serial_puts("   Size: 0x");
     print_dword(BL2_SIZE);
 
-    ledsup(0x0001);
-    while (1);
+    ledsup(0x0005);
+    /* while (1); */
+    {
+            int i = 0;
+            unsigned int reg[] = {
+                    0x0001, 0x0002, 0x0004, 0x0008,
+                    0x0008, 0x0004, 0x0002, 0x0001
+            };
+        
+            GPMCON_REG = 0x11111111;
+            GPMPUD_REG = 0x00055555;
+            GPMDAT_REG = 0x0005;
+        
+            for ( ; ; ) {
+                    GPMDAT_REG = ~reg[i];
+                    sleep(100);
+                    i = (i + 1) % (sizeof(reg)/sizeof(reg[0]));
+            }
+    }
     
     retv = CopyMMCtoMem(1, uintv, (unsigned short)(BL2_SIZE/BLOCK_SIZE),
     					(unsigned int *)(BL2_ADDR+MEMORY_BASE_ADDRESS), 0);
