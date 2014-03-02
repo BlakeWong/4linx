@@ -21,7 +21,7 @@ void sleep(int msecs)
         }
 }
 
-void dump_bl2(void);
+void dump_bl2(unsigned char *);
 
 int main(void)
 {
@@ -67,8 +67,33 @@ int main(void)
         int ret = movi_bl2_copy();
         if (ret) {
                 k_printf("done\n");
-                dump_bl2();
-                k_printf("Jumping to BL2 entry...\n");
+                dump_bl2((unsigned char *)BL2_BASE);
+                unsigned char *msg = (unsigned char *)0x5fe283b8;
+                
+                /* k_printf("message: %s\n", msg); */
+                /* serial_puts(msg); */
+                /* k_printf("Jumping to BL2 entry...\n"); */
+
+                k_printf("dump 128K region:\n");
+                dump_bl2((unsigned char *)BL2_BASE + 128* 1024);
+                k_printf("\n");
+
+                k_printf("dump 180K region:\n");
+                dump_bl2((unsigned char *)BL2_BASE + 180* 1024);
+                k_printf("\n");
+                
+                k_printf("dump 190K region: 0x%08x:\n", BL2_BASE + 190 * 1024);
+                dump_bl2((unsigned char *)BL2_BASE + 190* 1024);
+                k_printf("\n");
+
+                k_printf("dump pre message:\n");
+                dump_bl2((unsigned char *)msg - 4096);
+                k_printf("\n");
+
+                k_printf("dump message:\n");
+                dump_bl2((unsigned char *)msg);
+                k_printf("\n");
+                
                 /* ((int(*)(void))BL2_BASE)(); */
         }
         else {
@@ -79,13 +104,18 @@ int main(void)
         return 0;
 }
 
-void dump_bl2(void)
+void dump_bl2(unsigned char *addr)
 {
-        volatile unsigned char *bl2_mem = (volatile unsigned char *)BL2_BASE;
         int i = 0;
         for ( ; i < 512; i++) {
                 if (i % 16 == 0) k_printf("\n");
-                k_printf("%02x ", bl2_mem[i]);
+                k_printf("%02x ", addr[i]);
         }
         k_printf("\n");
+}
+
+
+void do_baddead(void) {
+        k_printf("[panic]: caught exception\n");
+        while (1);
 }

@@ -53,7 +53,7 @@ lowlevel_init:
 	
 	ldr     r1, =0x04000000
 	str     r1, [r0, #GPFCON_OFFSET]
-        ldr     r1, =0x2000
+    ldr     r1, =0x2000
 	str     r1, [r0, #GPFDAT_OFFSET]
 	
  	/* LED on only #8 */

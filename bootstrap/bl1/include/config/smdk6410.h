@@ -195,7 +195,7 @@
 #define CFG_BARGSIZE		CFG_CBSIZE	/* Boot Argument Buffer Size	*/
 
 #define CFG_MEMTEST_START	MEMORY_BASE_ADDRESS	/* memtest works on	*/
-#define CFG_MEMTEST_END		MEMORY_BASE_ADDRESS + 0x7e00000		/* 128 MB in DRAM	*/
+#define CFG_MEMTEST_END		MEMORY_BASE_ADDRESS + 0xfe00000		/* 256 MB in DRAM	*/
 
 #undef CFG_CLKS_IN_HZ		/* everything, incl board info, in Hz */
 
@@ -410,8 +410,8 @@
 #define CFG_UBOOT_SIZE		(2*1024*1024)
 
 /* base address for uboot */
-#define CFG_UBOOT_BASE		0x57e00000
-#define CFG_PHY_UBOOT_BASE	MEMORY_BASE_ADDRESS + 0x7e00000
+#define CFG_UBOOT_BASE		0x5fe00000
+#define CFG_PHY_UBOOT_BASE	MEMORY_BASE_ADDRESS + 0xfe00000
 
 #define CFG_ENV_OFFSET		0x00080000
 

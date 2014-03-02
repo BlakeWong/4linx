@@ -359,9 +359,6 @@ phy_last_jump:
 	ldr	sp, FIQ_STACK_START
 	.endm
 
-
-do_baddead:
-    b .
     
 /*
  * exception handlers
