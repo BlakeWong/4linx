@@ -2,6 +2,7 @@
 *.img
 *.elf
 *.bin
+*.dis
 *cscope*
 TAGS
 .DS_Store
