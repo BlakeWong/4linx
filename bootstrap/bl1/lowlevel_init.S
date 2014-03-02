@@ -248,11 +248,6 @@ wait_for_async:
 	mov	r1, #0x10000
 1:	subs	r1, r1, #1
 	bne	1b
-#if 0
-	mrc	p15, 0, r0, c1, c0, 0
-	orr	r0, r0, #0xc0000000	/* clock setting in MMU */
-	mcr	p15, 0, r0, c1, c0, 0
-#endif
 
 #ifdef CONFIG_SYNC_MODE				/* Synchronization for VIC port */
 	ldr	r1, [r0, #OTHERS_OFFSET]
@@ -330,46 +325,4 @@ nand_asm_init:
 	str     r1, [r0, #NFCONT_OFFSET]
 
 	mov	pc, lr
-
-#ifdef CONFIG_ENABLE_MMU
-
-/*
- * MMU Table for SMDK6400
- */
-
-	/* form a first-level section entry */
-.macro FL_SECTION_ENTRY base,ap,d,c,b
-	.word (\base << 20) | (\ap << 10) | \
-	      (\d << 5) | (1<<4) | (\c << 3) | (\b << 2) | (1<<1)
-.endm
-.section .mmudata, "a"
-	.align 14
-	// the following alignment creates the mmu table at address 0x4000.
-	.globl mmu_table
-mmu_table:
-	.set __base,0
-	// 1:1 mapping for debugging
-	.rept 0xA00
-	FL_SECTION_ENTRY __base,3,0,0,0
-	.set __base,__base+1
-	.endr
-
-	// access is not allowed.
-	.rept 0xC00 - 0xA00
-	.word 0x00000000
-	.endr
-
-	// 128MB for SDRAM 0xC0000000 -> 0x50000000
-	.set __base, 0x500
-	.rept 0xD00 - 0xC00
-	FL_SECTION_ENTRY __base,3,0,1,1
-	.set __base,__base+1
-	.endr
-
-	// access is not allowed.
-	.rept 0x1000 - 0xD00
-	.word 0x00000000
-	.endr
-
-#endif
 

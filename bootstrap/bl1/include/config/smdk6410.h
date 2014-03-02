@@ -44,13 +44,7 @@
 #define CONFIG_SYS_CLK_FREQ	12000000	/* the SMDK6400 has 12MHz input clock */
 
 
-/* #define CONFIG_ENABLE_MMU */
-
-#ifdef CONFIG_ENABLE_MMU
-#define virt_to_phys(x)	virt_to_phy_smdk6410(x)
-#else
 #define virt_to_phys(x)	(x)
-#endif
 
 #define CONFIG_MEMORY_UPPER_CODE
 
@@ -416,11 +410,7 @@
 #define CFG_UBOOT_SIZE		(2*1024*1024)
 
 /* base address for uboot */
-#ifdef CONFIG_ENABLE_MMU
-#define CFG_UBOOT_BASE		0xc7e00000
-#else
 #define CFG_UBOOT_BASE		0x57e00000
-#endif
 #define CFG_PHY_UBOOT_BASE	MEMORY_BASE_ADDRESS + 0x7e00000
 
 #define CFG_ENV_OFFSET		0x00080000

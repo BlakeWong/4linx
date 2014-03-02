@@ -41,7 +41,6 @@ int main(void)
         serial_puts("By Kristin Kowalcijk\n");
         serial_puts("Email: morisama@yeah.net\n\n");
 
-#define	TCM_BASE		 0x0C004000
         k_printf("TCM info: \n");
         k_printf("Total Block #: %d\n", readreg(0x0C003FFC));
         k_printf("RCA info: 0x%08X\n", readreg(0x0C003FF8));

@@ -29,15 +29,10 @@
 
 #include <config.h>
 #include <config/version.h>
-#ifdef CONFIG_ENABLE_MMU
-#include <asm/domain.h>
-#endif
 #include <asm/regs.h>
 
-#ifndef CONFIG_ENABLE_MMU
 #ifndef CFG_PHY_UBOOT_BASE
 #define CFG_PHY_UBOOT_BASE	CFG_UBOOT_BASE
-#endif
 #endif
 
 /*
@@ -194,30 +189,6 @@ cpu_init_crit:
 
 
 after_copy:
-#ifdef CONFIG_ENABLE_MMU
-enable_mmu:
-	/* enable domain access */
-	ldr	r5, =0x0000ffff
-	mcr	p15, 0, r5, c3, c0, 0		@ load domain access register
-
-	/* Set the TTB register */
-	ldr	r0, _mmu_table_base
-	ldr	r1, =CFG_PHY_UBOOT_BASE
-	ldr	r2, =0xfff00000
-	bic	r0, r0, r2
-	orr	r1, r0, r1
-	mcr	p15, 0, r1, c2, c0, 0
-
-	/* Enable the MMU */
-mmu_on:
-	mrc	p15, 0, r0, c1, c0, 0
-	orr	r0, r0, #1			/* Set CR_M to enable MMU */
-	mcr	p15, 0, r0, c1, c0, 0
-	nop
-	nop
-	nop
-	nop
-#endif
 
 skip_hw_init:
 	/* Set up the stack						    */
@@ -251,11 +222,6 @@ clbss_l:
 _start_armboot:
 	/* .word start_armboot */
     .word TEXT_BASE
-
-#ifdef CONFIG_ENABLE_MMU
-_mmu_table_base:
-	.word mmu_table
-#endif
 
 
 /*
