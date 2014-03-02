@@ -6,7 +6,7 @@
 
 
 #define	TCM_BASE		 0x0C004000
-#define BL2_BASE         TEXT_BASE
+#define BL2_BASE         0x57E00000
 
 #define SS_SIZE			(8 * 1024)
 #define eFUSE_SIZE		(1 * 1024)	// 0.5k eFuse, 0.5k reserved

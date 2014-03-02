@@ -4,5 +4,5 @@
 
 /*
   Where do we load our BL2 code
- */
+*/
 #define TEXT_BASE  0x57e00000

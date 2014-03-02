@@ -21,6 +21,8 @@ void sleep(int msecs)
         }
 }
 
+void dump_bl2(void);
+
 int main(void)
 {
         int i = 0;
@@ -62,13 +64,7 @@ int main(void)
         int ret = movi_bl2_copy();
         if (ret) {
                 k_printf("done\n");
-                volatile unsigned char *bl2_mem = (volatile unsigned char *)BL2_BASE;
-                int i = 0;
-                for ( ; i < 512; i++) {
-                        if (i % 16 == 0) k_printf("\n");
-                        k_printf("%02x ", bl2_mem[i]);
-                }
-                k_printf("\n");
+                dump_bl2();
                 k_printf("Jumping to BL2 entry...\n");
                 ((int(*)(void))BL2_BASE)();
         }
@@ -77,12 +73,18 @@ int main(void)
                 while (1);
         }
 
-        /* for (i = 0; ; ) { */
-        /*         GPMDAT_REG = ~reg[i]; */
-        /*         sleep(100); */
-        /*         i = (i + 1) % (sizeof(reg)/sizeof(reg[0])); */
-        /* } */
-
         while (1);
         return 0;
+}
+
+void dump_bl2(void)
+{
+        k_printf("done\n");
+        volatile unsigned char *bl2_mem = (volatile unsigned char *)BL2_BASE;
+        int i = 0;
+        for ( ; i < 512; i++) {
+                if (i % 16 == 0) k_printf("\n");
+                k_printf("%02x ", bl2_mem[i]);
+        }
+        k_printf("\n");
 }
