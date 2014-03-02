@@ -12,7 +12,7 @@ img.elf: main.o startup.o linker.ld
 	$(CROSS_LD) -T linker.ld startup.o main.o -o $@
 
 main.o: main.c
-	$(CROSS_CC) -c $< -o $@
+	$(CROSS_CC) -c $< -o $@ -Os
 
 startup.o: startup.s
 	$(CROSS_AS) $< -o $@
