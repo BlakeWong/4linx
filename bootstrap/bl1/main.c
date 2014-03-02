@@ -69,17 +69,19 @@ int main(void)
                         k_printf("%02x ", bl2_mem[i]);
                 }
                 k_printf("\n");
+                k_printf("Jumping to BL2 entry...\n");
+                ((int(*)(void))BL2_BASE)();
         }
         else {
                 k_printf("FAILED\n");
                 while (1);
         }
 
-        for (i = 0; ; ) {
-                GPMDAT_REG = ~reg[i];
-                sleep(100);
-                i = (i + 1) % (sizeof(reg)/sizeof(reg[0]));
-        }
+        /* for (i = 0; ; ) { */
+        /*         GPMDAT_REG = ~reg[i]; */
+        /*         sleep(100); */
+        /*         i = (i + 1) % (sizeof(reg)/sizeof(reg[0])); */
+        /* } */
 
         while (1);
         return 0;
