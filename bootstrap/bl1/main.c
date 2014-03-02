@@ -26,11 +26,8 @@ void dump_bl2(void);
 int main(void)
 {
         int i = 0;
-        unsigned int reg[] = {
-                0x0001, 0x0002, 0x0004, 0x0008,
-                0x0008, 0x0004, 0x0002, 0x0001
-        };
 
+        /* all leds up */
         GPMCON_REG = 0x11111111;
         GPMPUD_REG = 0x00055555;
         GPMDAT_REG = 0x0000;
@@ -59,26 +56,31 @@ int main(void)
         k_printf("BL2_BASE: 0x%08x\n", BL2_BASE);
         k_printf("MOVI_BL2_POS: %d, MOVI_BL2_BLKCNT: %d\n", MOVI_BL2_POS, MOVI_BL2_BLKCNT);
 
+        k_printf("Clearing BSS... ");
+        volatile int *bl2_mem = (volatile int *)BL2_BASE;
+        for (i = 0; i < MOVI_BL2_BLKCNT * MOVI_BLKSIZE / sizeof(int); i++) {
+                bl2_mem[i] = 0;
+        }
+        k_printf("done\n");
+        
         k_printf("Loading BL2 to DRAM... ");
         int ret = movi_bl2_copy();
         if (ret) {
                 k_printf("done\n");
                 dump_bl2();
                 k_printf("Jumping to BL2 entry...\n");
-                ((int(*)(void))BL2_BASE)();
+                /* ((int(*)(void))BL2_BASE)(); */
         }
         else {
                 k_printf("FAILED\n");
                 while (1);
         }
 
-        while (1);
         return 0;
 }
 
 void dump_bl2(void)
 {
-        k_printf("done\n");
         volatile unsigned char *bl2_mem = (volatile unsigned char *)BL2_BASE;
         int i = 0;
         for ( ; i < 512; i++) {

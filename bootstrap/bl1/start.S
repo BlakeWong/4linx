@@ -206,17 +206,6 @@ stack_setup:
 
 #endif
 
-clear_bss:
-	ldr	r0, _bss_start		/* find start of bss segment        */
-	ldr	r1, _bss_end		/* stop here                        */
-	mov 	r2, #0x00000000		/* clear                            */
-
-clbss_l:
-	str	r2, [r0]		/* clear loop...                    */
-	add	r0, r0, #4
-	cmp	r0, r1
-	ble	clbss_l
-
 	ldr	pc, _start_armboot
 
 _start_armboot:
